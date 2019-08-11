@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function Square(props) {
-    console.log(props.n);
     return (
         <button className="square" onClick={props.onClick}>
             {props.value}
@@ -16,7 +15,7 @@ class Board extends React.Component {
         super(props);
         this.state = {
             player: 'X',
-            squares: Array(9).fill(null),
+            squares: Array(9).fill(" "),
         }
     }
 
@@ -29,17 +28,44 @@ class Board extends React.Component {
     }
 
     handleClick(i) {
+        if (this.checkWinner()) {
+            return;
+        }
         let squares = this.state.squares.slice();
         squares[i] = this.state.player;
-        this.setState({squares: squares});
+        this.setState({squares: squares}, () => {this.checkWinner()});
         this.setState({player: this.state.player === 'X' ? 'O': 'X'});
-        console.log('click');
+    }
+
+    checkWinner() {
+        const state = this.state.squares.join("");
+        const player = this.state.player === 'X' ? 'O': 'X';
+        let winningStates = [
+            new RegExp([player, player, player].join("")),
+            new RegExp([player, ".", player, ".", player].join("")),
+            new RegExp([player, "..", player, "..", player].join("")),
+            new RegExp([player, "...", player, "...", player].join("")),
+        ];
+        winningStates.forEach(
+            (re) => {
+                console.log(re.exec(state));
+                if (re.exec(state)) {
+                    console.log("Winner " + player + "!");
+                    // this.setState({player: "Winner " + player + "!"})
+                    return true;
+                }
+            }
+        )
+        return false;
     }
 
     render() {
-        console.log('render board');
-        const status = 'Next player: ' + this.state.player;
-
+        let status;
+        if (this.checkWinner()) {
+            status = 'Winner: ' + this.state.player + "!";
+        } else {
+            status = 'Next player: ' + this.state.player;
+        }
         return (
             <div>
                 <div className="status">{status}</div>
