@@ -37,26 +37,34 @@ class Board extends React.Component {
         this.setState({player: this.state.player === 'X' ? 'O': 'X'});
     }
 
-    checkWinner() {
+    checkPlayerWinner(player) {
         const state = this.state.squares.join("");
-        const player = this.state.player === 'X' ? 'O': 'X';
+        let winner = false;
         let winningStates = [
             new RegExp([player, player, player].join("")),
-            new RegExp([player, ".", player, ".", player].join("")),
+            new RegExp(["..", player, ".", player, ".", player, ".."].join("")),
             new RegExp([player, "..", player, "..", player].join("")),
             new RegExp([player, "...", player, "...", player].join("")),
         ];
         winningStates.forEach(
             (re) => {
-                console.log(re.exec(state));
                 if (re.exec(state)) {
                     console.log("Winner " + player + "!");
-                    // this.setState({player: "Winner " + player + "!"})
-                    return true;
+                    winner = true;
                 }
             }
         )
-        return false;
+        return winner;
+    }
+
+    checkWinner() {
+        if (this.checkPlayerWinner('X')) {
+            return 'X';
+        }
+        if (this.checkPlayerWinner('O')) {
+            return 'O';
+        }
+        return undefined;
     }
 
     render() {
