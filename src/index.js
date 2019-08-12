@@ -12,10 +12,9 @@ function Square(props) {
 
 class Board extends React.Component {
     renderSquare(i) {
-        let value = this.props.getValue(i);
         return <Square
             n={i}
-            value={value}
+            value={this.props.getValue(i)}
             onClick={() => {this.props.onClick(i)}}
         />;
     }
@@ -62,11 +61,8 @@ class Game extends React.Component {
     }
 
     render() {
-        let status = 'Next player: ' + this.state.player;
         const winningPlayer = this.checkWinner();
-        if (winningPlayer) {
-            status = 'Winner: ' + winningPlayer + "!";
-        }
+        const status = winningPlayer ? 'Winner: ' + winningPlayer + "!" : 'Next player: ' + this.state.player;
         return (
             <div className="game">
                 <div className="game-board">
@@ -81,8 +77,7 @@ class Game extends React.Component {
     }
 
     getValue(i) {
-        let value = this.state.history[this.state.history.length - 1].squares[i];
-        return value;
+        return this.state.history[this.state.history.length - 1].squares[i];
     }
 
     handleClick(i) {
@@ -90,20 +85,17 @@ class Game extends React.Component {
             return;
         }
         if (this.state.history[this.state.history.length - 1].squares[i] === " ") {
-            let history = this.state.history.slice();
-            let squares = history[history.length - 1].squares.slice();
+            const history = this.state.history;
+            const squares = history[history.length - 1].squares.slice();
             squares[i] = this.state.player;
-            history.push({squares: squares});
-            this.setState({history: history});
+            this.setState({history: history.concat([{squares: squares}])});
             this.setState({player: this.state.player === 'X' ? 'O': 'X'});
-            console.log(history);
         }
     }
 
     checkPlayerWinner(player) {
         const state = this.state.history[this.state.history.length - 1].squares.join("");
-        let winner = false;
-        let winningStates = [
+        const winningStates = [
             new RegExp([player, player, player, "......"].join("")),
             new RegExp(["...", player, player, player, "..."].join("")),
             new RegExp(["......", player, player, player].join("")),
@@ -111,15 +103,13 @@ class Game extends React.Component {
             new RegExp([player, "..", player, "..", player].join("")),
             new RegExp([player, "...", player, "...", player].join("")),
         ];
-        winningStates.forEach(
-            (re) => {
-                if (re.exec(state)) {
-                    console.log("Winner " + player + "!");
-                    winner = true;
-                }
+        for (const re of winningStates) {
+            if (re.exec(state)) {
+                console.log("Winner " + player + "!");
+                return true;
             }
-        )
-        return winner;
+        }
+        return false;
     }
 
     checkWinner() {
